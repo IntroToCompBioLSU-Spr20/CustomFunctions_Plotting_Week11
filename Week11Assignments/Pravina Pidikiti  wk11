@@ -1,0 +1,115 @@
+Week 11 Assignment - Custom Functions and Plotting Write a function that will read in this week's 
+county-level covid data ("covidData_4.7.20.csv") and create a line plot showing increases in cumulative 
+case counts or deaths through time for a particular state. The line plot should have labeled axes and a grid.
+
+The function should accept two arguments. The first argument should be the name of the state. The second 
+should indicate whether the user wants to plot case counts or deaths (defaulting to case counts). 
+You will need to write a second function that calculates the case counts per state per day, summing across counties/parishes.
+
+As always, remember to document your code, including docstrings for functions.
+
+NOTE 1: One thing that tripped me up initially - not all counties/parishes have fips codes in this dataset. 
+So that field may be empty for some lines in the file.
+
+NOTE 2: Remember that when you first read from a file, everything is considered a string. 
+To get proper plots, you'll need to convert numbers stored as strings to actual numbers.
+
+import matplotlib.pyplot as plt
+import numpy as np
+import copy
+import re 
+
+def stateData(state,data = 'cases'):
+    covidData = open("covidData_4.7.20.csv", "r") #open and read covid file 
+    #create dictionary for the case and death counts 
+    dataCases = {}  
+    dataDeaths = {}
+    
+    for i in covidData:
+        if state in i:
+            date, county, state, fips, cases, deaths = i.split(",")
+            #Check if finding case counts or death counts 
+            if data == 'cases':
+                case = int(cases) #convert numbers stored as strings to actual numbers
+                if date in dataCases: #make sure date is not repeated twice 
+                    dataCases[date] += case
+                else:
+                    dataCases[date] = case
+            elif data == 'deaths':
+                death = int(deaths)
+                if date in dataDeaths:
+                    dataDeaths[date] += death
+                else:
+                    dataDeaths[date] = death
+    covidData.close()
+    xVar = []
+    yVar = []
+    
+    xVar = list(dataCases.keys()) #create the x variable to have the dates which are the keys of the dataCases
+    if data == 'cases':
+        yVar = list(caseCounts.values())
+    elif data == 'deaths':
+        yVar = list(dataDeaths.values()) #create the y variable to have the counts which are the valus of the dictionaries 
+    return xVar,yVar
+    
+stateInput = input("Enter a state: ")
+dataInput = input("Enter cases or deaths: ")
+xaxis, yaxis = stateData(state = stateInput, data = dataInput)
+plt.figure()
+plt.xlabel('Date')
+plt.ylabel('Number of {} in {}'.format(dataInput,stateInput))
+plt.xticks(rotation=90)
+plt.grid(True)
+plt.plot(xaxis, yaxis)
+plt.show()
+
+Write a second function that is similar to the first, but shows increases in cumulative case counts or deaths through time for a particular county/parish in a particular state.
+
+The function should accept three arguments. The first argument should be the name of the county/parish. The second should be the name of the state. The third should indicate whether the user wants to plot case counts or deaths (defaulting to case counts).
+
+As always, remember to document your code, including docstrings for functions.
+
+
+def countyData(county, state, data = 'cases'):
+    covidData = open("covidData_4.7.20.csv", "r")
+    dataCases = {}
+    dataDeaths = {}
+    
+    for i in covidData:
+        if county in i and state in i:
+            date, county, state, fips, cases, deaths = i.split(",")
+            if data == 'cases':
+                case = int(cases)
+                if date in dataCases:
+                    dataCases[date] += case
+                else:
+                    dataCases[date] = case
+            elif data == 'deaths':
+                death = int(deaths)
+                if date in dataDeaths:
+                    dataDeaths[date] += death
+                else:
+                    dataDeaths[date] = death
+    covidData.close()
+    xVar = []
+    yVar = []
+    
+    xVar = list(dataCases.keys())
+    if data == 'cases':
+        yVar = list(caseCounts.values())
+    elif data == 'deaths':
+        yVar = list(dataDeaths.values())
+    return xVar,yVar
+    
+countyInput = input("Enter a county: ")
+stateInput = input("Enter a state: ")
+dataInput = input("Enter cases or deaths: ")
+xaxis, yaxis = countyData(county = countyInput, state = stateInput, data = dataInput)
+plt.figure()
+plt.xlabel('Date')
+plt.ylabel('Number of {} in {}'.format(dataInput,stateInput))
+plt.xticks(rotation=90)
+plt.grid(True)
+plt.plot(xaxis, yaxis)
+plt.show()
+
