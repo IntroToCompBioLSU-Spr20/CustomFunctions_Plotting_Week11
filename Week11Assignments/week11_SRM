@@ -1,0 +1,227 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Week 11 Assignment - Custom Functions and Plotting"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Write a function that will read in this week's county-level covid data (\"covidData_4.7.20.csv\") and create a line plot showing increases in cumulative case counts or deaths through time for  a particular state. The line plot should have labeled axes and a grid.\n",
+    "\n",
+    "The function should accept two arguments. The first argument should be the name of the state. The second should indicate whether the user wants to plot case counts or deaths (defaulting to case counts). You will need to write a second function that calculates the case counts per state per day, summing across counties/parishes.\n",
+    "\n",
+    "As always, remember to document your code, including docstrings for functions.\n",
+    "\n",
+    "NOTE 1: One thing that tripped me up initially - not all counties/parishes have fips codes in this dataset. So that field may be empty for some lines in the file.\n",
+    "\n",
+    "NOTE 2: Remember that when you first read from a file, everything is considered a string. To get proper plots, you'll need to convert numbers stored as strings to actual numbers."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Import needed modules here\n",
+    "import re\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Your code here...\n",
+    "def codivData(state, cases_deaths=\"cases\"):\n",
+    "    \"\"\"function that gets the required information (state and cases/deaths) from the csv file \"\"\"\n",
+    "    csvfile = open(\"covidData_4.7.20.csv\", \"r\")\n",
+    "    #creating two dictionaries to store info on cases and deaths, respectively.\n",
+    "    NoCases={}\n",
+    "    NoDeaths={}\n",
+    "    #searching for cases and deaths in the csv file\n",
+    "    for row in csvfile:\n",
+    "        if state in row:\n",
+    "            date, county, state, fips, cases, deaths = row.split(\",\")\n",
+    "            # adding the cases or deaths to the dictinaries\n",
+    "            if cases_deaths==\"cases\":\n",
+    "            #converting the cases and deaths into interger for the graph\n",
+    "                case=int(cases)\n",
+    "                if date in NoCases:\n",
+    "                    NoCases[date] += case\n",
+    "                else:\n",
+    "                    NoCases[date] = case\n",
+    "            elif cases_deaths==\"deaths\":\n",
+    "                death=int(deaths)\n",
+    "                if date in NoDeaths:\n",
+    "                    NoDeaths[date] += death\n",
+    "                else:\n",
+    "                    NoDeaths[date] = death\n",
+    "    csvfile.close()\n",
+    "    \n",
+    "    # creating two lists that will be the sources for x and y axes in the graph \n",
+    "    dateXaxis = []\n",
+    "    casesYaxis = []\n",
+    "    # adding the cases or deaths values\n",
+    "    dateXaxis=list(NoCases.keys())\n",
+    "    if cases_deaths ==\"cases\":\n",
+    "        casesYaxis=list(NoCases.values())\n",
+    "    if cases_deaths==\"deaths\":\n",
+    "        casesYaxis=list(NoDeaths.values())\n",
+    "    #storing this info as source for the final graph\n",
+    "    return (dateXaxis, casesYaxis)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Use your function to create a plot here\n",
+    "def covidGraph(state, cases_deaths=\"cases\"):\n",
+    "    \"\"\"function to plot a graph showing the cases/deaths for a state selected by the user\"\"\"\n",
+    "    #getting the x and y axis from the fucntion above\n",
+    "    xaxis, yaxis=codivData(state, cases_deaths)\n",
+    "    # editing the graph (labels, rotation of axis days, and, grid)\n",
+    "    plt.figure()\n",
+    "    plt.xlabel(\"Days\")\n",
+    "    plt.ylabel(cases_deaths)\n",
+    "    plt.xticks(rotation=90)\n",
+    "    plt.grid(True)\n",
+    "    plt.plot(xaxis, yaxis)\n",
+    "    # showing the graph as final outcome\n",
+    "    plt.show() "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# checking that the function is working\n",
+    "covidGraph(\"Alabama\", \"cases\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Write a second function that is similar to the first, but shows increases in cumulative case counts or deaths through time for a particular county/parish in a particular state.\n",
+    "\n",
+    "The function should accept three arguments. The first argument should be the name of the county/parish. The second should be the name of the state. The third should indicate whether the user wants to plot case counts or deaths (defaulting to case counts).\n",
+    "\n",
+    "As always, remember to document your code, including docstrings for functions."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Your code here\n",
+    "def covidCData(county,state,cases_deaths=\"cases\"):\n",
+    "    \"\"\"function that gets the required information (county, state and cases/deaths) from the csv file \"\"\"\n",
+    "    csvfile = open(\"covidData_4.7.20.csv\", \"r\")\n",
+    "    #creating two dictionaries to store info on cases and deaths, respectively.\n",
+    "    NoCases={}\n",
+    "    NoDeaths={}\n",
+    "    #searching for cases and deaths in the csv file\n",
+    "    for row in csvfile:\n",
+    "        if county in row and state in row:\n",
+    "            date, county, state, fips, cases, deaths = row.split(\",\")\n",
+    "            # adding the cases or deaths to the dictinaries\n",
+    "            if cases_deaths==\"cases\":\n",
+    "            #converting the cases and deaths into interger for the graph\n",
+    "                case=int(cases)\n",
+    "                if date in NoCases:\n",
+    "                    NoCases[date] += case\n",
+    "                else:\n",
+    "                    NoCases[date] = case\n",
+    "            elif cases_deaths==\"deaths\":\n",
+    "                death=int(deaths)\n",
+    "                if date in NoDeaths:\n",
+    "                    NoDeaths[date] += death\n",
+    "                else:\n",
+    "                    NoDeaths[date] = death\n",
+    "    csvfile.close()\n",
+    "    \n",
+    "    # creating two lists that will be the sources for x and y axes in the graph \n",
+    "    dateXaxis = []\n",
+    "    casesYaxis = []\n",
+    "    # adding the cases or deaths values\n",
+    "    dateXaxis=list(NoCases.keys())\n",
+    "    if cases_deaths ==\"cases\":\n",
+    "        casesYaxis=list(NoCases.values())\n",
+    "    if cases_deaths==\"deaths\":\n",
+    "        casesYaxis=list(NoDeaths.values())\n",
+    "    #storing this info as source for the graph\n",
+    "    return (dateXaxis, casesYaxis)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Use your function to create a plot here\n",
+    "def covidCGraph(county,state,cases_deaths=\"cases\"):\n",
+    "    \"\"\"function that plots cases/deaths per county per state in the USA\"\"\"\n",
+    "    #getting the x and y axis from the fucntion above\n",
+    "    xaxis, yaxis = covidCData(county,state,cases_deaths)\n",
+    "    # editing the graph (labels, rotation of days, and, grid)\n",
+    "    plt.figure()\n",
+    "    plt.ylabel(cases_deaths)\n",
+    "    plt.xticks(rotation=90) \n",
+    "    plt.xlabel(\"Days\")\n",
+    "    plt.grid(True)\n",
+    "    plt.plot(xaxis, yaxis)\n",
+    "    # showing the graph as final outcome\n",
+    "    plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# checking that the function is working\n",
+    "covidCGraph(\"Baton Rouge\", \"Louisiana\", \"cases\")"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
