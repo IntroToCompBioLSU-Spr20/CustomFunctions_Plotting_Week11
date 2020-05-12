@@ -1,0 +1,120 @@
+import requests
+url = 'https://github.com/IntroToCompBioLSU-Spr20/CustomFunctions_Plotting_Week11/blob/master/covidData_4.7.20.csv'
+r=requests.get(url)
+with open("covidData.csv","wb") as code:
+     code.write(r.content)
+# Import needed modules here
+import re
+import matplotlib.pyplot as plt
+import numpy as np
+import copy
+# Your code here...
+def caseInState(coData ='covidData.csv', state = 'Louisiana', stat = 'cases'):
+    """Refers to a file,particular state and count of cases in that specific state from that file"""
+    cumulativeCount = []
+    #Opens the data file and creates a list of dates from the input state ensuring there is no repetition of one date 
+    with open(coData,'r') as file:
+            date = re.findall(r"(.+),.+,{},.+,.+,.+".format(state),file.read())
+            list = []
+            for i in dates:
+                if i in list:
+                    pass
+                elif i not in list:
+                    list.append(i)
+            file.close()
+# Finally, appends the sum at that date to the list of cumulative totals declared at the beginning of the function
+    if stat == "cases": # Checks if the input statistic is cases or deaths 
+
+        for date in list: # For each date in the list of dates,
+
+            with open(coData, 'r') as file:
+                casesInSameDate = re.findall(r'{},.+,{},.+,(.+),.+'.format(date,state),file.read())
+                casesInSameDate = [int(i) for i in casesInSameDate]
+                cumulativeCount.append(sum(casesInSameDate)) # adds the counts for every county in a specific state on that date
+
+
+            file.close()
+    elif stat == "deaths":
+        for date in list:
+            with open(coData, 'r') as file:
+                deathsInSameDate = re.findall(r'{},.+,{},.+,.+,(.+)'.format(date,state),file.read())
+                deathsInSameDate = [int(i) for i in deathsInSameDate]
+                cumulativeCount.append(sum(deathsInSameDate))
+            file.close()
+    else:
+        print('Input error')
+    if len(list) == len(cumulativeCount): #Checks to ensure the list of dates and the list of cumulative counts have same length
+        myVar = [list,cumulativeCount] # stored both value in a variable
+        return myVar # and returns both if so
+
+    else:
+        print("An error in the function")     
+# Use your function to create a plot here
+stateInput = input("Enter a state to display:") # user inputs for state 
+
+statInput = input("Enter a statistic to display:") #user input for counts
+func = caseInState(state = stateInput, stat = statInput) #creates a function using the inputs
+# Assign plt plot paramaters
+plt.figure(figsize = (4,4))
+plt.ylabel('number of {} in {}'.format(statInput, stateInput))
+plt.xlabel('Date')
+plt.xticks(rotation=90)
+plt.grid(True)
+plt.plot(func[0],func[1])
+plt.show()
+Enter a state to display:Louisiana
+Enter a statistic to display:cases
+ 
+
+# Your code here
+def caseInCounty(coData = 'covidData.csv', county = 'Jefferson',state = 'Louisiana', stat = 'cases'):
+    """This function refers to an input file, a county, a state, and a statistic to show that statistic over time"""
+    cumulativeCount = []
+    
+    with open(coData,'r') as file: # Opens the data file
+        list = re.findall(r"(.+),{},{},.+,.+,.+".format(county,state),file.read()) # and creates a list of dates from the input state county
+
+        file.close()
+    if stat == 'cases': # Checks if the input stat is cases or deaths 
+
+        for date in list:
+            with open(data, 'r') as file:
+                casesInSameDate = int(re.search(r'{},{},{},.+,(.+),.+'.format(date,county,state),file.read()).group(1)) # For each date in the list of dates, finds the statistic for that given date in the specific state county
+
+                cumulativeCount.append(casesInSameDate)   #  Appends the statistic at that date to the list of cumulative total count 
+
+                file.close()
+    elif stat == 'deaths':
+        for date in list:
+            with open(data, 'r') as file:
+                deathsInSameDate= int(re.search(r'{},{},{},.+,.+,(.+)'.format(date,county,state),file.read()).group(1))
+                cumulativeCount.append(deathsInSameDate)   
+                file.close()
+    else:
+        print('Input error')
+    
+    if len(list) == len(cumulativeCount): #Checks to ensure the list of dates and the list of cumulative counts have same length
+
+        myVar = [list,cumulativeCount] # stored both value in a variable
+        return myVar # and returns both if so
+
+    else:
+        print("An error in the function")
+# Use your function to create a plot here
+countyInput = input("Enter a county to display:") # user inputs for county
+stateInput = input("Enter the state in which the county is in:") # user inputs for state
+statInput = input("Enter a statistic to display:") # user inputs for counts
+func = caseInCounty(county = countyInput, state = stateInput, stat = statInput) #creates a function using the inputs
+# assign plt plot paramaters
+plt.figure(figsize = (4,4))
+plt.ylabel('Number of {} in {}, {}'.format(statInput,countyInput,stateInput))
+plt.xlabel('Date')
+plt.xticks(rotation=90)
+plt.grid(True)
+plt.plot(func[0],func[1])
+plt.show()
+Enter a county to display:Jefferson
+Enter the state in which the county is in:Louisiana
+Enter a statistic to display:cases
+ 
+
